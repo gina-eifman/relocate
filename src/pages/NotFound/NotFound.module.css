@@ -1,0 +1,32 @@
+.notfound {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.notfound__header {
+    text-transform: uppercase;
+    font-family: 'Aclonica';
+    font-size: clamp(80px, 10vw, 128px);
+    margin: 0 0 20px;
+}
+
+.notfound__text {
+    font-family: 'Short_Stack';
+    font-size: clamp(20px, 2.5vw, 36px);
+    margin: 0 30px;
+    text-align: center;
+}
+
+.notfound__link {
+    text-decoration: underline;
+    color: white;
+    transition: opacity ease-in-out .3s;
+}
+
+.notfound__link:hover {
+    opacity: .7;
+}

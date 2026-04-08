@@ -1,0 +1,17 @@
+@font-face {
+    font-family: "Aclonica";
+    src: url(./Aclonica/Aclonica-Regular.woff) format("woff"),
+         url(./Aclonica/Aclonica-Regular.woff2) format("woff2");
+}
+
+@font-face {
+    font-family: "Akaya_Kanadaka";
+    src: url(./Akaya_Kanadaka/AkayaKanadaka-Regular.woff) format("woff"),
+         url(./Akaya_Kanadaka/AkayaKanadaka-Regular.woff2) format("woff2");
+}
+
+@font-face {
+    font-family: "Short_Stack";
+    src: url(./Short_Stack/ShortStack-Regular.woff) format("woff"),
+         url(./Short_Stack/ShortStack-Regular.woff2) format("woff2");
+}

@@ -1,0 +1,66 @@
+.searchbar {
+    width: 80%;
+}
+
+.searchbar__form {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    border: solid white 2px;
+    border-radius: 15px;
+    backdrop-filter: blur(15px);
+    margin-bottom: 5px;
+}
+
+.searchbar__input {
+    padding: clamp(8px, 1vw, 15px);
+    font-family: 'Short_Stack';
+    font-size: clamp(20px, 2vw, 32px);
+    background-color: rgba(0, 0, 0, 0);
+    border: none;
+    width: 90%;
+    color: white;
+}
+
+.searchbar__input:focus {
+    outline: none;
+    outline-width: 1px;
+}
+
+.searchbar__input::placeholder {
+    color: #BABABA;
+}
+
+.searchbar__submit {
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url('./../../../images/icon_search.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: clamp(30px, 3.5vw, 50px);
+    height: clamp(30px, 3.5vw, 50px);
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-right: 7px;
+    transition: opacity ease-in-out .3s;
+}
+
+.searchbar__submit:hover {
+    opacity: 0.7;
+}
+
+.searchbar__submit:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+}
+
+.searchbar__submit:disabled:hover {
+    opacity: 0.4;
+}
+
+.searchbar__error {
+    font-family: 'Short_Stack';
+    color: #D90000;
+    font-size: clamp(12px, 1.3vw, 20px);
+}

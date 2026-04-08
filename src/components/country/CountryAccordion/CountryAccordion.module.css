@@ -1,0 +1,112 @@
+.accordion {
+    width: 100%;
+    overflow: hidden;
+}
+
+.accordion__flexbox {
+    width: clamp(280px, 50vw, 700px);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-bottom: 20px;
+    border-bottom: solid white 2px;
+    transition: padding-right ease-in-out .3s;
+}
+
+.accordion__flexbox_opened {
+    padding-right: clamp(20px, 20vw, 300px);
+}
+
+.accordion__header {
+    font-family: 'Akaya_Kanadaka';
+    font-size: clamp(32px, 4vw, 60px);
+    margin: 0;
+}
+
+.accordion__button {
+    width: 15px;
+    aspect-ratio: 1 / 1;
+    background-color: rgba(0, 0, 0, 0);
+    border: none;
+    background-image: url('./../../../images/button_open.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    transition: all ease-in-out .5s;
+}
+
+.accordion__button:hover {
+    opacity: .7;
+    transform: translateY(2px);
+}
+
+.accordion__button_opened {
+    background-image: url('./../../../images/button_close.svg');
+}
+
+.accordion__button_opened:hover {
+    transform: translateY(-2px);
+}
+
+.accordion-enter {
+    opacity: 0;
+}
+
+.accordion-enter-active {
+    opacity: 1;
+    transition: all ease-in-out .3s;
+}
+
+.accordion-exit {
+    opacity: 1;
+}
+
+.accordion-exit-active {
+    opacity: 0;
+    transition: all ease-in-out .3s;
+}
+
+.accordion__list {
+    width: clamp(300px, 70vw, 1000px);
+    list-style: none;
+    padding: 0;
+    margin: 30px 0 0;
+    backdrop-filter: blur(15px);
+    border-radius: 40px;
+    padding: 30px 25px 0;
+    box-sizing: border-box;
+    transition: height ease-in-out .3s;
+}
+
+.accordion__item {
+    width: 90%;
+    color: white;
+    font-family: 'Short_Stack';
+    text-align: justify;
+}
+
+.accordion__subheader {
+    margin: 0 0 5px;
+    font-size: clamp(20px, 2vw, 32px);
+}
+
+.accordion__text {
+    font-size: clamp(18px, 2vw, 32px);
+    padding: 0 0 30px;
+    box-sizing: border-box;
+    margin: 0;
+}
+
+@media screen and (max-width: 768px) {
+    .accordion {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .accordion__flexbox_opened {
+        padding-left: clamp(10px, 5vw, 150px);
+        padding-right: clamp(10px, 5vw, 150px);
+    }
+}

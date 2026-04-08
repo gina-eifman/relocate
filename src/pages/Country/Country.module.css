@@ -1,0 +1,124 @@
+@keyframes loadingDots {
+    0% { content: "."; }
+    33% { content: ".."; }
+    66% { content: "..."; }
+    100% { content: "."; }
+}
+
+.country {
+    width: 100vw;
+    height: 100%;
+    min-height: 101vh;
+    margin: 0;
+    padding: clamp(60px, 8vw, 120px) 0 clamp(70px, 9vw, 130px);
+    box-sizing: border-box;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.country__flexbox {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: clamp(280px, 50vw, 700px);
+    padding: 0 10vw clamp(40px, 4.5vw, 70px);
+}
+
+.country__header {
+    margin: 0;
+    font-family: 'Aclonica';
+    font-size: clamp(42px, 6.5vw, 96px);
+    text-transform: uppercase;
+}
+
+.country__icon {
+    background-image: url('./../../images/heart_big.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-color: rgba(0, 0, 0, 0);
+    border: none;
+    width: clamp(30px, 6vw, 80px);
+    aspect-ratio: 1 / 1;
+    padding: 0;
+    transition: transform ease-in-out .3s;
+    cursor: pointer;
+}
+
+.country__icon:hover {
+    transform: translateY(-2px);
+}
+
+.country__icon_active {
+    background-image: url('./../../images/heart_big_clicked.svg');
+}
+
+.country__container {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    margin: 0 10vw clamp(60px, 8vw, 120px);
+}
+
+.country__button {
+    width: clamp(280px, 50vw, 700px);
+    color: white;
+    text-align: center;
+    font-family: 'Aclonica';
+    font-size: clamp(24px, 2.5vw, 40px);
+    margin: 0 10vw;
+    padding: 10px 0;
+    box-sizing: border-box;
+    border: solid white 2px;
+    border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0);
+    transition: all ease-in-out .3s;
+    cursor: pointer;
+}
+
+.country__button:hover {
+    transform: translateY(-2px);
+    backdrop-filter: blur(15px);
+}
+
+.country__button_loading {
+    backdrop-filter: blur(15px);
+    cursor: wait;
+}
+
+.country__button_loading::after {
+    content: "..";
+    animation: loadingDots 1.5s steps(3, end) infinite;
+    display: inline-block;
+    width: 24px;
+    text-align: left;
+}
+
+.country__button_loading:hover {
+    transform: none;
+}
+
+.country__button_active {
+    background-color: white;
+    color: #070707;
+}
+
+@media screen and (max-width: 768px) {
+    .country {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .country__flexbox {
+        padding: 0 0 clamp(60px, 8vw, 120px);
+        margin: 0 auto;
+    }
+
+    .country__container {
+        margin: 0 auto clamp(60px, 8vw, 120px);
+    }
+
+    .country__button {
+        margin: 0 auto;
+    }
+}

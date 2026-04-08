@@ -1,0 +1,131 @@
+@keyframes loadingDots {
+    0% { content: "."; }
+    33% { content: ".."; }
+    66% { content: "..."; }
+    100% { content: "."; }
+}
+
+.auth {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 5vw 0;
+    width: clamp(320px, 60vw, 1000px);
+    box-sizing: border-box;
+    border: solid white 2px;
+    border-radius: clamp(20px, 4vw, 60px);
+    margin: 130px auto;
+    backdrop-filter: blur(15px);
+}
+
+.auth__header {
+    text-transform: uppercase;
+    font-family: 'Aclonica';
+    font-size: clamp(36px, 5vw, 80px);
+    margin: 0 0 clamp(20px, 3vw, 35px);
+}
+
+.auth__form {
+    display: flex;
+    flex-direction: column;
+    font-family: 'Short_Stack';
+    width: 80%;
+}
+
+.auth__field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: clamp(15px, 1.5vw, 25px);
+    font-size: clamp(16px, 1.5vw, 24px);
+}
+
+.auth__input {
+    padding: clamp(8px, 1vw, 15px);
+    margin: 10px 0 5px;
+    background-color: rgba(0,0,0,0);
+    border: solid white 2px;
+    border-radius: 10px;
+    font-size: clamp(20px, 2vw, 32px);
+    color: white;
+}
+
+.auth__input:focus {
+    outline-color: #E59700;
+    outline-width: 1px;
+}
+
+.auth__error {
+    font-size: clamp(12px, 1.3vw, 20px);
+    color: #ffc249;
+}
+
+.auth__container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80%;
+    margin: 0 auto;
+}
+
+.auth__submit {
+    width: 100%;
+    font-family: 'Aclonica';
+    font-size: clamp(24px, 3vw, 40px);
+    color: white;
+    padding: 10px 0;
+    box-sizing: border-box;
+    margin: clamp(20px, 3vw, 35px) 0 5px;
+    background-color: rgba(0,0,0,0);
+    border: solid white 2px;
+    border-radius: 10px;
+    transition: all ease-in-out .3s;
+    cursor: pointer;
+}
+
+.auth__submit:hover {
+    transform: translateY(-2px);
+    backdrop-filter: blur(15px);
+}
+
+.auth__submit:disabled {
+    cursor: not-allowed;
+    transition: none;
+    opacity: .7;
+}
+
+.auth__submit:disabled:hover {
+    transform: translateY(0);
+    backdrop-filter: none;
+}
+
+.auth__submit_loading {
+    backdrop-filter: blur(15px);
+    cursor: wait;
+}
+
+.auth__submit_loading::after {
+    content: "..";
+    animation: loadingDots 1.5s steps(3, end) infinite;
+    display: inline-block;
+    width: 24px;
+    text-align: left;
+}
+
+.auth__text {
+    font-family: 'Short_Stack';
+    font-size: clamp(16px, 2vw, 32px);
+    margin: 35px 0 0;
+    width: 80%;
+    text-align: center;
+}
+
+.auth__link {
+    color: white;
+    transition: opacity ease-in-out .3s;
+    text-decoration: underline;
+    margin-left: 5px;
+}
+
+.auth__link:hover {
+    opacity: .7;
+}
