@@ -1,4 +1,4 @@
-import { API_URL } from "../utils/constants";
+import { API_BASE_URL } from "../utils/config";
 
 class Countries {
     constructor({baseUrl, headers}) {
@@ -22,7 +22,7 @@ class Countries {
 }
 
 export const countriesAPI = new Countries({
-    baseUrl: API_URL,
+    baseUrl: API_BASE_URL,
     headers: {
         "Content-type": "application/json"
     }

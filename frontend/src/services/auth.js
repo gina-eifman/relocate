@@ -1,4 +1,4 @@
-import { API_URL } from "../utils/constants";
+import { API_BASE_URL } from "../utils/config";
 
 class Auth {
     constructor({baseUrl}) {
@@ -35,5 +35,5 @@ class Auth {
 }
 
 export const authAPI = new Auth({
-    baseUrl: API_URL
+    baseUrl: API_BASE_URL
 });

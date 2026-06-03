@@ -1,4 +1,4 @@
-import { API_URL } from "../utils/constants";
+import { API_BASE_URL } from "../utils/config";
 
 class Profile {
     constructor({baseUrl}) {
@@ -32,5 +32,5 @@ class Profile {
 }
 
 export const profileAPI = new Profile({
-    baseUrl: API_URL
+    baseUrl: API_BASE_URL
 });

@@ -1,4 +1,4 @@
-import { API_URL } from "../utils/constants";
+import { API_BASE_URL } from "../utils/config";
 
 class Collections {
     constructor({baseUrl}) {
@@ -79,5 +79,5 @@ class Collections {
 }
 
 export const collectionsAPI = new Collections({
-    baseUrl: API_URL
+    baseUrl: API_BASE_URL
 });

@@ -1,4 +1,4 @@
-import { API_URL } from "../utils/constants";
+import { API_BASE_URL } from "../utils/config";
 
 class FavouritesAPI {
     constructor({baseUrl}) {
@@ -42,5 +42,5 @@ class FavouritesAPI {
 }
 
 export const favouritesAPI = new FavouritesAPI({
-    baseUrl: API_URL
+    baseUrl: API_BASE_URL
 });

@@ -4,7 +4,6 @@ export const REGISTER_ERR = "an error occurred during user registration";
 export const LOGIN_ERR = "an error occurred during user authorization";
 export const SERVER_ERR = "there is a problem with the connection or the server is unavailable. wait a bit and try again.";
 export const KEY_WORDS_ERR = "search value can't be empty";
-export const API_URL = "https://relocate-backend-6e6y.onrender.com";
 
 export const categories = [
     { name: 'All countries', id: 'all-countries', link: '/search' },
