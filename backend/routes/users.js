@@ -1,10 +1,8 @@
 const router = require('express').Router();
-const { getProfileInfo, getAvatar, editProfileInfo } = require('../controllers/users');
-const { upload } = require('../middlewares/upload');
+const { getProfileInfo, editProfileInfo } = require('../controllers/users');
 const { validateEditProfileInfo } = require('../middlewares/validation');
 
 router.get('/me', getProfileInfo);
-router.get('/avatar/:id', getAvatar);
-router.patch('/me', upload.single('avatar'), editProfileInfo);
+router.patch('/me', validateEditProfileInfo, editProfileInfo);
 
 module.exports = router;

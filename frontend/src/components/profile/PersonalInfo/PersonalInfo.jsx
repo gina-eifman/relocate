@@ -23,19 +23,15 @@ const PersonalInfo = ({ user, onUpdate, isLoading }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSaving(true);
-    
-    const formDataSubmit = new FormData();
-    formDataSubmit.append('name', formData.name);
-    formDataSubmit.append('email', formData.email);
-    formDataSubmit.append('phone', formData.phone ? String(formData.phone) : '');
-    formDataSubmit.append('age', formData.age ? String(formData.age) : '');
-    formDataSubmit.append('gender', formData.gender);
-    
-    if (selectedFile) {
-        formDataSubmit.append('avatar', selectedFile);
-    }
-    
-    await onUpdate(formDataSubmit);
+    const data = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone ? Number(formData.phone) : null,
+        age: formData.age ? Number(formData.age) : null,
+        gender: formData.gender,
+        avatar: formData.avatar || null,
+    };
+    await onUpdate(data);
     setIsSaving(false);
     setIsEditing(false);
   };
@@ -57,14 +53,19 @@ const PersonalInfo = ({ user, onUpdate, isLoading }) => {
   };
 
   const handleAvatarChange = (e) => {
-      const file = e.target.files[0];
-      if (file) {
-          setSelectedFile(file);
-          // Превью для отображения (без отправки на сервер)
-          const previewUrl = URL.createObjectURL(file);
-          imgAvatar.src = previewUrl;
-      }
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+        setFormData(prev => ({ ...prev, avatar: reader.result }));
+        setSelectedFile(file);
+        };
+        reader.readAsDataURL(file);
+        const previewUrl = URL.createObjectURL(file);
+        imgAvatar.src = previewUrl;
+    }
   };
+
   if (!user || isLoading) return <Loader />
 
   return (

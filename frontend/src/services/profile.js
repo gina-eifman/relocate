@@ -20,13 +20,14 @@ class Profile {
     }
 
     updateProfile(data, token) {
-        return fetch(`${this._baseUrl}/users/me`, {
-            method: 'PATCH',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            },
-            body: data
-        }).then(this._checkResponseData);
+    return fetch(`${this._baseUrl}/users/me`, {
+        method: 'PATCH',
+        headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+    }).then(this._checkResponseData);
     }
 }
 
