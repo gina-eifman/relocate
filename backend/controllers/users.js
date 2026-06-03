@@ -6,6 +6,7 @@ const ConflictError = require('../errors/ConflictError');
 const { getGridFSBucket } = require('../middlewares/gridfs');
 const mongoose = require('mongoose');
 
+let bucket;
 
 module.exports.getProfileInfo = (req, res, next) => {
   User.findById(req.user._id)
@@ -19,16 +20,14 @@ module.exports.getProfileInfo = (req, res, next) => {
 module.exports.getAvatar = async (req, res) => {
   try {
     const fileId = new mongoose.Types.ObjectId(req.params.id);
-    const bucket = getGridFSBucket();
-    
     if (!bucket) {
-      return res.status(503).json({ message: 'GridFS not ready' });
+      bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
+        bucketName: 'avatars'
+      });
     }
-
     const downloadStream = bucket.openDownloadStream(fileId);
     downloadStream.pipe(res);
   } catch (err) {
-    console.error(err);
     res.status(404).json({ message: 'Avatar not found' });
   }
 };
@@ -47,7 +46,13 @@ module.exports.editProfileInfo = (req, res, next) => {
 
   
   if (req.file) {
-    updateData.avatar = req.file.id; // ObjectId файла в GridFS
+    // Инициализируем bucket прямо здесь
+    if (!bucket) {
+      bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
+        bucketName: 'avatars'
+      });
+    }
+    updateData.avatar = req.file.id;
   }
 
   User.findByIdAndUpdate(userId, updateData, {

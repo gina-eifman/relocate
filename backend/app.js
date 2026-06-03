@@ -26,6 +26,7 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);
+app.set('trust proxy', 1);
 app.use(limiter);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(router);
