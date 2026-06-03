@@ -1,0 +1,69 @@
+.card {
+    border: solid white 2px;
+    border-radius: 30px;
+    backdrop-filter: blur(15px);
+}
+
+.card__image {
+    aspect-ratio: 1/1;
+    width: 100%;
+    border-bottom: solid white 2px;
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+}
+
+.card__container {
+    margin: 20px auto;
+    display: flex;
+    width: 90%;
+    justify-content: space-between;
+    align-items: center;
+    gap: 30px;
+}
+
+.card__header {
+    font-family: 'Aclonica';
+    color: white;
+    font-size: clamp(24px, 2.5vw, 32px);
+    width: 80%;
+    margin: 0;
+    transition: opacity ease-in-out .3s;
+}
+
+.card__header:hover {
+    opacity: .7;
+}
+
+.card__button {
+    background-image: url('./../../../images/heart.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: clamp(30px, 2.5vw, 40px);
+    height: clamp(30px, 2.5vw, 40px);
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    transition: transform ease-in-out .3s;
+}
+
+.card__button:hover {
+    transform: translateY(-2px);
+}
+
+.card__button_active {
+    background-image: url('./../../../images/heart_clicked.svg');
+    transition: transform ease-in-out .3s;
+}
+
+.card__button_active:hover {
+    transform: translateY(-2px);
+}
+
+.card__text {
+    font-family: 'Short_Stack';
+    font-size: clamp(16px, 1.5vw, 24px);
+    width: 90%;
+    text-align: justify;
+    margin: 0 auto 40px;
+    line-height: clamp(22px, 2.1vw, 30px);
+}

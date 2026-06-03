@@ -1,8 +1,0 @@
-@import url(./fonts/normalize.css);
-@import url(./fonts/fonts.css);
-
-body {
-    color: white;
-    background-image: url('./images/bg_def.png');
-    background-size: cover;
-}
