@@ -12,6 +12,17 @@ const path = require('path');
 const { getGridFSBucket } = require('./middlewares/gridfs');
 const app = express();
 
+if (!mongoose.mongo.ObjectID) {
+  mongoose.mongo.ObjectID = mongoose.Types.ObjectId;
+}
+
+let gfs;
+
+mongoose.connection.once('open', () => {
+  gfs = Grid(mongoose.connection.db, mongoose.mongo);
+  gfs.collection('avatars');
+});
+
 mongoose.connect(MONGO_DB)
   .then(() => {
     console.log('MongoDB connected to:', MONGO_DB);

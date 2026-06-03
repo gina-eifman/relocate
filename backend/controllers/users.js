@@ -9,6 +9,10 @@ const Grid = require('gridfs-stream');
 let gfs;
 const conn = mongoose.connection;
 
+if (!mongoose.mongo.ObjectID) {
+  mongoose.mongo.ObjectID = mongoose.Types.ObjectId;
+}
+
 // Функция для получения gfs
 const getGfs = () => {
   if (!gfs && conn.db) {
