@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { getProfileInfo, getAvatar, editProfileInfo } = require('../controllers/users');
-const { initUpload } = require('../middlewares/upload');
+const { upload } = require('../middlewares/upload');
 const { validateEditProfileInfo } = require('../middlewares/validation');
 
 router.get('/me', getProfileInfo);
