@@ -3,8 +3,8 @@ const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
 const { NOT_FOUND, BAD_REQUEST, CONFLICT } = require('../utils/constants');
 const ConflictError = require('../errors/ConflictError');
+const { getGridFSBucket } = require('../middlewares/gridfs');
 const mongoose = require('mongoose');
-const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, { bucketName: 'avatars' });
 
 
 module.exports.getProfileInfo = (req, res, next) => {
@@ -17,9 +17,20 @@ module.exports.getProfileInfo = (req, res, next) => {
 };
 
 module.exports.getAvatar = async (req, res) => {
-  const fileId = new mongoose.Types.ObjectId(req.params.id);
-  const downloadStream = bucket.openDownloadStream(fileId);
-  downloadStream.pipe(res);
+  try {
+    const fileId = new mongoose.Types.ObjectId(req.params.id);
+    const bucket = getGridFSBucket();
+    
+    if (!bucket) {
+      return res.status(503).json({ message: 'GridFS not ready' });
+    }
+
+    const downloadStream = bucket.openDownloadStream(fileId);
+    downloadStream.pipe(res);
+  } catch (err) {
+    console.error(err);
+    res.status(404).json({ message: 'Avatar not found' });
+  }
 };
 
 module.exports.editProfileInfo = (req, res, next) => {

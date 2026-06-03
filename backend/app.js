@@ -9,10 +9,14 @@ const { MONGO_DB, PORT } = require('./utils/config');
 const { limiter } = require('./utils/constants');
 const cors = require('cors');
 const path = require('path');
+const { getGridFSBucket } = require('./middlewares/gridfs');
 const app = express();
 
 mongoose.connect(MONGO_DB)
-  .then(() => console.log('MongoDB connected to:', MONGO_DB)) // ← добавить
+  .then(() => {
+    console.log('MongoDB connected to:', MONGO_DB);
+    getGridFSBucket();
+  })
   .catch((err) => console.log(err));
 
 app.use(cors({
