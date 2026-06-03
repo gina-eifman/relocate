@@ -20,11 +20,7 @@ module.exports.getProfileInfo = (req, res, next) => {
 module.exports.getAvatar = async (req, res) => {
   try {
     const fileId = new mongoose.Types.ObjectId(req.params.id);
-    if (!bucket) {
-      bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
-        bucketName: 'avatars'
-      });
-    }
+    const bucket = new mongoose.mongo.GridFSBucket(conn.db, { bucketName: 'avatars' });
     const downloadStream = bucket.openDownloadStream(fileId);
     downloadStream.pipe(res);
   } catch (err) {
@@ -46,13 +42,18 @@ module.exports.editProfileInfo = (req, res, next) => {
 
   
   if (req.file) {
-    // Инициализируем bucket прямо здесь
-    if (!bucket) {
-      bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
-        bucketName: 'avatars'
-      });
-    }
-    updateData.avatar = req.file.id;
+    const filename = Date.now() + '-' + req.file.originalname;
+    const writeStream = gfs.createWriteStream({
+      filename: filename,
+      bucketName: 'avatars'
+    });
+    
+    writeStream.write(req.file.buffer);
+    writeStream.end();
+    
+    writeStream.on('finish', async () => {
+      updateData.avatar = writeStream.id;
+    });
   }
 
   User.findByIdAndUpdate(userId, updateData, {

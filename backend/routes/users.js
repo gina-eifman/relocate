@@ -5,9 +5,6 @@ const { validateEditProfileInfo } = require('../middlewares/validation');
 
 router.get('/me', getProfileInfo);
 router.get('/avatar/:id', getAvatar);
-router.patch('/me', (req, res, next) => {
-  const upload = initUpload();
-  return upload.single('avatar')(req, res, next);
-}, validateEditProfileInfo, editProfileInfo);
+router.patch('/me', upload.single('avatar'), editProfileInfo);
 
 module.exports = router;

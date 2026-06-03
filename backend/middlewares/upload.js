@@ -1,25 +1,19 @@
 const multer = require('multer');
-const { GridFsStorage } = require('multer-gridfs-storage');
+const crypto = require('crypto');
+const path = require('path');
 const mongoose = require('mongoose');
+const Grid = require('gridfs-stream');
 
-let storage = null;
-let upload = null;
+let gfs;
+const conn = mongoose.connection;
 
-const initUpload = () => {
-  if (storage) return upload;
-  
-  storage = new GridFsStorage({
-    db: mongoose.connection.db,
-    file: (req, file) => {
-      return {
-        filename: Date.now() + '-' + file.originalname,
-        bucketName: 'avatars'
-      };
-    }
-  });
-  
-  upload = multer({ storage });
-  return upload;
-};
+conn.once('open', () => {
+  gfs = Grid(conn.db, mongoose.mongo);
+  gfs.collection('avatars');
+});
 
-module.exports = { initUpload };
+const storage = multer.memoryStorage();
+
+const upload = multer({ storage });
+
+module.exports = { upload, gfs, conn };
