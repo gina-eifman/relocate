@@ -10,13 +10,11 @@ const { limiter } = require('./utils/constants');
 const cors = require('cors');
 const path = require('path');
 const { getGridFSBucket } = require('./middlewares/gridfs');
-const { initUpload } = require('./middlewares/upload');
 const app = express();
 
 mongoose.connect(MONGO_DB)
   .then(() => {
     console.log('MongoDB connected to:', MONGO_DB);
-    initUpload();
   })
   .catch((err) => console.log(err));
 
