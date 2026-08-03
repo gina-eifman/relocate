@@ -2,7 +2,7 @@ import { Navigate } from "react-router-dom";
 
 function ProtectedRoute({isLoggedIn, element: Component, ...props}) {
     return(
-        isLoggedIn || localStorage.jwt ? <Component {...props} /> : <Navigate to="/" replace />
+        isLoggedIn || localStorage.jwt ? <Component {...props} /> : <Navigate to="/sign-in" replace />
     )
 };
 

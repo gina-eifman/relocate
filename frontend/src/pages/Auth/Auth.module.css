@@ -54,11 +54,6 @@
     outline-width: 1px;
 }
 
-.auth__error {
-    font-size: clamp(12px, 1.3vw, 20px);
-    color: #ffc249;
-}
-
 .auth__container {
     display: flex;
     flex-direction: column;

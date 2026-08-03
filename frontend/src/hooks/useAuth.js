@@ -2,7 +2,6 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { authAPI } from "../services/auth";
 import { profileAPI } from "../services/profile";
-import { EXISTING_EMAIL_ERR, LOGIN_ERR, REGISTER_ERR } from "../utils/constants";
 
 export const useAuth = () => {
     const [isLoggedIn, setIsLoggedIn] = React.useState(false);
@@ -18,6 +17,7 @@ export const useAuth = () => {
             setIsLoggedIn(true);
         } catch (err) {
             console.error(err);
+            setErrMessage(err.message);
             setIsLoggedIn(false);
             localStorage.removeItem('jwt');
         }
@@ -33,6 +33,13 @@ export const useAuth = () => {
         }
     }, [navigate]);
 
+    const handleSignOut = React.useCallback(() => {
+        localStorage.removeItem('jwt');
+        setCurrentUser(null);
+        setIsLoggedIn(false);
+        navigate("/sign-in", { replace: true });
+    }, [navigate]);
+
     const handleLogin = React.useCallback(async (formValue, redirectTo = "/profile") => {
         setIsLoading(true);
         setErrMessage("");
@@ -41,12 +48,14 @@ export const useAuth = () => {
             if (res && res.token) {
                 localStorage.setItem('jwt', res.token);
                 await loadUser(res.token);
+                setIsLoggedIn(true);
                 navigate(redirectTo, { replace: true });
                 return res;
             }
         } catch (err) {
             console.log(err);
-            setErrMessage(LOGIN_ERR);
+            setErrMessage(err.message);
+            handleSignOut();
             throw err;
         } finally {
             setIsLoading(false);
@@ -64,19 +73,12 @@ export const useAuth = () => {
             }
         } catch (err) {
             console.log(err);
-            setErrMessage(err === "error 409" ? EXISTING_EMAIL_ERR : REGISTER_ERR);
+            setErrMessage(err.message);
             throw err;
         } finally {
             setIsLoading(false);
         }
     }, [handleLogin]);
 
-    const handleSignOut = React.useCallback(() => {
-        localStorage.removeItem('jwt');
-        setCurrentUser(null);
-        setIsLoggedIn(false);
-        navigate("/", { replace: true });
-    }, [navigate]);
-
-    return { isLoggedIn, currentUser, isLoading, errMessage, handleLogin, handleRegister, handleSignOut, setErrMessage };
+    return { isLoggedIn, currentUser, isLoadingAuth: isLoading, errMessageAuth: errMessage, handleLogin, handleRegister, handleSignOut, setErrMessage };
 };

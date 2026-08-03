@@ -5,36 +5,21 @@ const { errors } = require('celebrate');
 const { errorHandler } = require('./middlewares/errorHandler');
 const router = require('./routes/index');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
-const { MONGO_DB, PORT } = require('./utils/config');
+const { MONGO_URL, PORT } = require('./utils/config');
 const { limiter } = require('./utils/constants');
 const cors = require('cors');
 const path = require('path');
-const { getGridFSBucket } = require('./middlewares/gridfs');
 const app = express();
 
-if (!mongoose.mongo.ObjectID) {
-  mongoose.mongo.ObjectID = mongoose.Types.ObjectId;
-}
-
-let gfs;
-
-mongoose.connection.once('open', () => {
-  gfs = Grid(mongoose.connection.db, mongoose.mongo);
-  gfs.collection('avatars');
-});
-
-mongoose.connect(MONGO_DB)
-  .then(() => {
-    console.log('MongoDB connected to:', MONGO_DB);
-  })
+mongoose.connect(MONGO_URL)
   .catch((err) => console.log(err));
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000', 'https://relocate-omega.vercel.app'],
+  origin: ['https://relocate-omega.vercel.app'],
   credentials: true,
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(requestLogger);
 app.set('trust proxy', 1);
 app.use(limiter);
@@ -44,6 +29,4 @@ app.use(errorLogger);
 app.use(errors());
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Server started on port ${PORT}`);
-});
+app.listen(PORT, () => {});

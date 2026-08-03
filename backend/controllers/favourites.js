@@ -1,7 +1,8 @@
 const Favourite = require('../models/favourite');
 const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
-const { BAD_REQUEST, NOT_FOUND } = require('../utils/constants');
+const { BAD_REQUEST_ERR, NOT_FOUND_FAVOURITE_ERR, MANY_REQUESTS_ERR } = require('../utils/constants');
+const ManyRequestsError = require('../errors/ManyRequestsError');
 
 module.exports.getFavourites = (req, res, next) => {
   const owner = req.user._id;
@@ -14,12 +15,19 @@ module.exports.addFavourite = (req, res, next) => {
   const owner = req.user._id;
   const { id: countryId } = req.body;
   Favourite.create({ owner, countryId })
-    .then((favourite) => res.status(201).send(favourite))
+    .then((favourite) => {
+      if (!favourite) {
+        next(new NotFoundError(NOT_FOUND_FAVOURITE_ERR));
+      }
+      res.status(201).send(favourite);
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError(BAD_REQUEST));
+        next(new BadRequestError(BAD_REQUEST_ERR));
       } else if (err.code === 11000) {
-        next(new BadRequestError('Страна уже в избранном'));
+        next(new BadRequestError('Country is already in favourites'));
+      } else if (err.code === 429) {
+        next(new ManyRequestsError(MANY_REQUESTS_ERR));
       } else {
         next(err);
       }
@@ -33,9 +41,9 @@ module.exports.deleteFavourite = (req, res, next) => {
   Favourite.findOneAndDelete({ _id: id, owner })
     .then((favourite) => {
       if (!favourite) {
-        throw new NotFoundError(NOT_FOUND);
+        next(new NotFoundError(NOT_FOUND_FAVOURITE_ERR));
       }
-      res.send({ message: 'Страна удалена из избранного' });
+      res.send();
     })
     .catch(next);
 };

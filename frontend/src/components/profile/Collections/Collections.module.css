@@ -11,7 +11,7 @@
 .collections__header {
   margin-bottom: clamp(20px, 4vw, 40px);
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   gap: 10px;
 }
 
@@ -24,12 +24,42 @@
   transition: opacity ease-in-out 0.3s;
 }
 
+.collections__arrow:hover {
+  opacity: 0.7;
+}
+
+.collections__arrow_disabled {
+    color: #bababa;
+    cursor: default;
+}
+
+.collections__arrow_disabled:hover {
+    opacity: 1;
+}
+
 .collections__title {
   font-family: "Akaya_Kanadaka";
   font-size: clamp(32px, 6vw, 48px);
   color: white;
   text-align: center;
   margin: 0;
+}
+
+.collections__empty {
+    font-family: "Short_Stack";
+    font-size: clamp(20px, 4vw, 32px);
+    color: white;
+    text-align: center;
+}
+
+.collections__link {
+    color: white;
+    text-decoration: underline;
+    transition: opacity ease-in-out 0.3s;
+}
+
+.collections__link:hover {
+    opacity: 0.7;
 }
 
 .collections__scroll {
@@ -41,8 +71,14 @@
   scrollbar-width: none;
 }
 
+.collections__scroll_empty {
+  justify-content: center;
+  align-items: center;
+  gap: 0;
+}
+
 .collections__card {
-  flex: 0 0 350px;
+  flex: 0 0 clamp(250px, 25vw, 350px);
   cursor: pointer;
   transition: all ease-in-out 0.3s;
 }
@@ -99,7 +135,7 @@
 
 .collections__cardName {
   font-family: "Short_Stack";
-  font-size: clamp(22px, 4vw, 32px);
+  font-size: clamp(20px, 4vw, 32px);
   color: white;
   display: block;
   text-align: center;
@@ -108,7 +144,8 @@
 }
 
 .collections__plus {
-  flex: 0 0 350px;
+  flex: 0 0 clamp(250px, 25vw, 350px);
+  aspect-ratio: 1 / 1;
   border: 2px solid white;
   border-radius: 20px;
   display: flex;
@@ -123,4 +160,10 @@
 
 .collections__plus:hover {
   opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+  .collections {
+    border-radius: 40px;
+  }
 }

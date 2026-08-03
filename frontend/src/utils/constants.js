@@ -1,9 +1,7 @@
 export const EMAIL_REGEX = "^\\S+@\\S+\\.\\S+$";
-export const EXISTING_EMAIL_ERR = "the user with this email already exists";
-export const REGISTER_ERR = "an error occurred during user registration";
-export const LOGIN_ERR = "an error occurred during user authorization";
-export const SERVER_ERR = "there is a problem with the connection or the server is unavailable. wait a bit and try again.";
-export const KEY_WORDS_ERR = "search value can't be empty";
+export const MAX_AVATAR_SIZE = 2 * 1024 * 1024; // 2 MB
+export const KEY_WORDS_ERR = "Search value can't be empty.";
+export const AVATAR_ERR = `Avatar file is too large. Maximum size is ${MAX_AVATAR_SIZE / 1024 / 1024} MB.`;
 
 export const categories = [
     { name: 'All countries', id: 'all-countries', link: '/search' },

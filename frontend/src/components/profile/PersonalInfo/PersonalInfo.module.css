@@ -12,6 +12,8 @@
   aspect-ratio: 1/1;
   border-bottom: 2px solid white;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .personal__avatar {
@@ -145,7 +147,17 @@
   width: 40%;
 }
 
-/* Телефоны: поля в столбик */
+@media (max-width: 768px) {
+  .personal {
+    border-radius: 40px;
+  }
+
+  .personal__avatar {
+    border-top-left-radius: 40px;
+    border-top-right-radius: 40px;
+  }
+}
+
 @media (max-width: 600px) {
   .personal__field {
     flex-direction: column;

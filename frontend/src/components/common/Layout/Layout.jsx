@@ -9,7 +9,6 @@ function Layout () {
 
     useEffect(() => {
         const defaultBg = '/images/bg_def.png';
-        console.log(defaultBg)
         if (!location.pathname.startsWith('/country/')) {
             document.body.style.background = `url(${defaultBg}) top/cover no-repeat`;
         }

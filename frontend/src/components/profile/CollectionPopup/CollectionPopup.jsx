@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Link } from 'react-router-dom';
 import AddCountryPopup from './../AddCountryPopup/AddCountryPopup';
+import ErrorMessage from '../../common/ErrorMessage/ErrorMessage';
 import styles from './CollectionPopup.module.css';
 
 const CollectionPopup = ({ countries, collection, onClose, onUpdate, onAddCountry, onRemoveCountry, isNew, onCreate }) => {
@@ -15,14 +16,22 @@ const CollectionPopup = ({ countries, collection, onClose, onUpdate, onAddCountr
     const [isEditing, setIsEditing] = useState(false);
     const [name, setName] = useState(collection?.name || '');
     const [oldData, setOldData] = useState(null);
+    const [editingCountryIds, setEditingCountryIds] = useState([]); // локальный список стран
 
     // Пагинация
     const [itemsPerPage, setItemsPerPage] = useState(4);
     const [currentPage, setCurrentPage] = useState(0);
 
-    // Если isNew, используем локальные стейты, иначе данные из collection
-    const actualName = isNew ? newName : name;
-    const actualCountryIds = isNew ? newCountryIds : (collection?.countryIds || []);
+    // Ошибки
+    const [errors, setErrors] = useState({});
+
+    // Определяем актуальный список стран для отображения
+    const actualCountryIds = isNew
+        ? newCountryIds
+        : isEditing
+        ? editingCountryIds
+        : (collection?.countryIds || []);
+
     const actualCountries = actualCountryIds
         .map(id => countries.find(c => c.id === id))
         .filter(Boolean);
@@ -31,9 +40,10 @@ const CollectionPopup = ({ countries, collection, onClose, onUpdate, onAddCountr
     useEffect(() => {
         const updateItemsPerPage = () => {
             const width = window.innerWidth;
-            if (width >= 1200) setItemsPerPage(8);
-            else if (width >= 900) setItemsPerPage(6);
-            else if (width >= 600) setItemsPerPage(3);
+            if (width >= 1400) setItemsPerPage(8);
+            else if (width >= 1024) setItemsPerPage(6);
+            else if (width >= 768) setItemsPerPage(4);
+            else if (width >= 660) setItemsPerPage(2);
             else setItemsPerPage(2);
         };
         updateItemsPerPage();
@@ -64,67 +74,109 @@ const CollectionPopup = ({ countries, collection, onClose, onUpdate, onAddCountr
 
     // Режим редактирования существующей коллекции
     const handleEdit = () => {
-        setOldData({ name, countryIds: collection.countryIds });
+        setOldData({ name: collection.name, countryIds: [...collection.countryIds] });
+        setName(collection.name);
+        setEditingCountryIds([...collection.countryIds]); // копируем для локального редактирования
         setIsEditing(true);
         setCurrentPage(0);
+        setErrors({});
     };
 
     const handleCancel = () => {
-        setName(oldData.name);
+        if (oldData) {
+            setName(oldData.name);
+            setEditingCountryIds(oldData.countryIds);
+        }
         setIsEditing(false);
         setCurrentPage(0);
+        setErrors({});
     };
 
     const handleSubmitExisting = async () => {
-        setIsSaving(true);
-        const updated = await onUpdate(collection._id, { name, countryIds: collection.countryIds });
-        if (updated) {
-            setName(updated.name);
+        setErrors({});
+        if (!name.trim()) {
+            setErrors({ name: 'Collection name cannot be empty.' });
+            return;
         }
-        setIsSaving(false);
-        setIsEditing(false);
-        setCurrentPage(0);
-        onClose();
+        setIsSaving(true);
+        try {
+            // Отправляем финальные данные (название и обновлённый список стран)
+            const updated = await onUpdate(collection._id, { name, countryIds: editingCountryIds });
+            if (updated) {
+                setName(updated.name);
+            }
+            setIsEditing(false);
+            setCurrentPage(0);
+            onClose();
+        } catch (err) {
+            console.error('Update error:', err);
+            setErrors({ general: err.message });
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     // Режим создания новой коллекции
     const handleCreateSubmit = async () => {
-        if (!newName.trim()) return;
+        setErrors({});
         setIsSaving(true);
-        await onCreate(newName.trim(), newCountryIds);
-        setIsSaving(false);
-        onClose();
+        try {
+            await onCreate(newName.trim(), newCountryIds);
+            onClose();
+        } catch (err) {
+            console.error('Create error:', err);
+            setErrors({ general: err.message });
+        } finally {
+            setIsSaving(false);
+        }
     };
 
-    const handleAddCountry = async (countryId) => {
-        if (isNew) {
-            if (!newCountryIds.includes(countryId)) {
-                setNewCountryIds(prev => [...prev, countryId]);
+    // Добавление страны (локально, без запроса)
+    const handleAddCountry = (countryId) => {
+        setErrors(prev => ({ ...prev, general: '' }));
+        try {
+            if (isNew) {
+                if (!newCountryIds.includes(countryId)) {
+                    setNewCountryIds(prev => [...prev, countryId]);
+                }
+            } else {
+                // Добавляем в локальный стейт, если ещё нет
+                if (!editingCountryIds.includes(countryId)) {
+                    setEditingCountryIds(prev => [...prev, countryId]);
+                }
             }
-        } else {
-            await onAddCountry(collection._id, countryId);
-            const updatedCountryIds = [...collection.countryIds, countryId];
-            await onUpdate(collection._id, { countryIds: updatedCountryIds });
+            setShowAddPopup(false);
+            const newTotalPages = Math.ceil((actualCountryIds.length + 1) / itemsPerPage);
+            setCurrentPage(newTotalPages - 1);
+        } catch (err) {
+            console.error('Add country error:', err);
+            setErrors({ general: err.message });
         }
-        setShowAddPopup(false);
-        const newTotalPages = Math.ceil((actualCountryIds.length + 1) / itemsPerPage);
-        setCurrentPage(newTotalPages - 1);
     };
 
+    // Удаление страны (локально, без запроса)
     const handleRemoveCountry = (countryId) => {
-        console.log('=== handleRemoveCountry ===');
-        console.log('isNew:', isNew);
-        console.log('collection._id:', collection?._id);
-        console.log('countryId:', countryId);
-        
-        if (isNew) {
-            setNewCountryIds(prev => prev.filter(id => id !== countryId));
-        } else {
-            console.log('Вызываем onRemoveCountry с', collection._id, countryId);
-            onRemoveCountry(collection._id, countryId);
+        setErrors(prev => ({ ...prev, general: '' }));
+        try {
+            if (isNew) {
+                setNewCountryIds(prev => prev.filter(id => id !== countryId));
+            } else {
+                setEditingCountryIds(prev => prev.filter(id => id !== countryId));
+            }
+        } catch (err) {
+            console.error('Remove country error:', err);
+            setErrors({ general: err.message });
         }
     };
 
+    // Обработчики изменения полей названия
+    const handleNameChange = (e, setter) => {
+        const value = e.target.value;
+        setter(value);
+        setErrors(prev => ({ ...prev, name: '' }));
+    };
+
+    // Рендер содержимого
     const renderContent = () => {
         if (isNew) {
             return (
@@ -133,13 +185,14 @@ const CollectionPopup = ({ countries, collection, onClose, onUpdate, onAddCountr
                         <input
                             type="text"
                             value={newName}
-                            onChange={(e) => setNewName(e.target.value)}
+                            onChange={(e) => handleNameChange(e, setNewName)}
                             className={styles.popup__input}
                             placeholder="Collection name"
                             autoFocus
                         />
                         <button className={styles.popup__close} onClick={onClose}></button>
                     </div>
+                    <ErrorMessage message={errors.name} />
                     <div className={styles.popup__grid}>
                         {visibleCountries.map(country => (
                             <div key={country.id} className={styles.popup__card}>
@@ -158,15 +211,19 @@ const CollectionPopup = ({ countries, collection, onClose, onUpdate, onAddCountr
                                 </div>
                             </div>
                         ))}
-                        <div className={styles.popup__plus} onClick={() => setShowAddPopup(true)}>+</div>
+                        {totalPages === 0 || currentPage === totalPages - 1 ? 
+                            <div className={styles.popup__plus} onClick={() => setShowAddPopup(true)}>+</div> 
+                            : <></>
+                        }
                     </div>
                     {totalPages > 1 && (
                         <div className={styles.popup__pagination}>
-                            <button className={styles.popup__paginationArrow} onClick={goPrevPage} disabled={currentPage === 0}>←</button>
-                            <span className={styles.popup__paginationInfo}>{currentPage + 1} / {totalPages}</span>
-                            <button className={styles.popup__paginationArrow} onClick={goNextPage} disabled={currentPage + 1 === totalPages}>→</button>
+                            <button className={styles.popup__arrow} onClick={goPrevPage} disabled={currentPage === 0}>←</button>
+                            <span className={styles.popup__pages}>{currentPage + 1} / {totalPages}</span>
+                            <button className={styles.popup__arrow} onClick={goNextPage} disabled={currentPage + 1 === totalPages}>→</button>
                         </div>
                     )}
+                    <ErrorMessage message={errors.general} />
                     <div className={styles.popup__actions}>
                         <button
                             type="submit"
@@ -198,15 +255,16 @@ const CollectionPopup = ({ countries, collection, onClose, onUpdate, onAddCountr
                         <input
                             type="text"
                             value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            onChange={(e) => handleNameChange(e, setName)}
                             className={styles.popup__input}
                             autoFocus
                         />
                     ) : (
-                        <h2 className={styles.popup__title}>{displayName}</h2>
+                        <h2 className={styles.popup__input + ' ' + styles.popup__input_disabled}>{displayName}</h2>
                     )}
                     <button className={styles.popup__close} onClick={onClose}></button>
                 </div>
+                <ErrorMessage message={errors.name} />
                 <div className={styles.popup__grid}>
                     {visibleCountries.map(country => (
                         <div key={country.id} className={styles.popup__card}>
@@ -215,7 +273,7 @@ const CollectionPopup = ({ countries, collection, onClose, onUpdate, onAddCountr
                                 style={{ backgroundImage: `url(${country.backgroundImage})` }}
                             >
                                 <div className={styles.popup__darklay}></div>
-                                {false && (
+                                {isEditingMode && (
                                     <button
                                         className={styles.popup__delete}
                                         onClick={() => handleRemoveCountry(country.id)}
@@ -233,17 +291,19 @@ const CollectionPopup = ({ countries, collection, onClose, onUpdate, onAddCountr
                             </div>
                         </div>
                     ))}
-                    {false && (
-                        <div className={styles.popup__plus} onClick={() => setShowAddPopup(true)}>+</div>
-                    )}
+                    {isEditingMode && (totalPages === 0 || currentPage === totalPages - 1) ? 
+                        <div className={styles.popup__plus} onClick={() => setShowAddPopup(true)}>+</div> 
+                        : <></>
+                    }
                 </div>
                 {totalPages > 1 && (
                     <div className={styles.popup__pagination}>
-                        <button className={styles.popup__paginationArrow} onClick={goPrevPage} disabled={currentPage === 0}>←</button>
-                        <span className={styles.popup__paginationInfo}>{currentPage + 1} / {totalPages}</span>
-                        <button className={styles.popup__paginationArrow} onClick={goNextPage} disabled={currentPage + 1 === totalPages}>→</button>
+                        <button className={styles.popup__arrow} onClick={goPrevPage} disabled={currentPage === 0}>←</button>
+                        <span className={styles.popup__pages}>{currentPage + 1} / {totalPages}</span>
+                        <button className={styles.popup__arrow} onClick={goNextPage} disabled={currentPage + 1 === totalPages}>→</button>
                     </div>
                 )}
+                <ErrorMessage message={errors.general} />
                 {isEditingMode ? (
                     <div className={styles.popup__actions}>
                         <button

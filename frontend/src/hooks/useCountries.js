@@ -21,5 +21,5 @@ export const useCountries = () => {
         }
     };
 
-    return { countries, isLoading, refetch: loadCountries };
+    return { countries, isLoadingCountries: isLoading, refetch: loadCountries };
 };

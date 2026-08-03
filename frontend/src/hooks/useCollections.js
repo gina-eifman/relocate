@@ -4,6 +4,7 @@ import { collectionsAPI } from "../services/collections";
 export const useCollections = () => {
     const [collections, setCollections] = React.useState([]);
     const [isLoading, setIsLoading] = React.useState(false);
+    const [errMessage, setErrMessage] = React.useState("");
 
     const getToken = () => localStorage.getItem('jwt');
 
@@ -16,6 +17,7 @@ export const useCollections = () => {
             setCollections(data);
         } catch (err) {
             console.error(err);
+            setErrMessage(err.message);
         } finally {
             setIsLoading(false);
         }
@@ -34,6 +36,7 @@ export const useCollections = () => {
             return newColl;
         } catch (err) {
             console.error(err);
+            setErrMessage(err.message);
         }
     };
 
@@ -46,6 +49,7 @@ export const useCollections = () => {
             return updated;
         } catch (err) {
             console.error(err);
+            setErrMessage(err.message);
         }
     };
 
@@ -57,40 +61,36 @@ export const useCollections = () => {
             setCollections(prev => prev.filter(c => c._id !== collectionId));
         } catch (err) {
             console.error(err);
+            setErrMessage(err.message);
+            if (err.message && err.message.includes('404')) {
+                setCollections(prev => prev.filter(c => c._id !== collectionId));
+            }
         }
     };
 
-    const addCountryToCollection = async (collectionId, countryId) => {
-        console.log('=== addCountryToCollection ===');
-        console.log('collectionId:', collectionId);
-        console.log('countryId:', countryId);
-        
+    const addCountryToCollection = async (collectionId, countryId) => {        
         const token = getToken();
         if (!token) return;
         try {
             const updated = await collectionsAPI.addCountryToCollection(collectionId, countryId, token);
-            console.log('Ответ сервера:', updated);
             setCollections(prev => prev.map(c => String(c._id) === String(collectionId) ? updated : c));
         } catch (err) {
             console.error('Ошибка при добавлении страны в коллекцию:', err);
+            setErrMessage(err.message);
         }
     };
 
-    const removeCountryFromCollection = async (collectionId, countryId) => {
-        console.log('=== removeCountryFromCollection ===');
-        console.log('collectionId:', collectionId);
-        console.log('countryId:', countryId);
-        
+    const removeCountryFromCollection = async (collectionId, countryId) => {        
         const token = getToken();
         if (!token) return;
         try {
             const updated = await collectionsAPI.removeCountryFromCollection(collectionId, countryId, token);
-            console.log('Ответ сервера:', updated);
             setCollections(prev => prev.map(c => String(c._id) === String(collectionId) ? updated : c));
         } catch (err) {
             console.error('Ошибка при удалении страны из коллекции:', err);
+            setErrMessage(err.message);
         }
     };
 
-    return { collections, isLoading, addCollection, updateCollection, removeCollection, addCountryToCollection, removeCountryFromCollection, refetch: loadCollections };
+    return { collections, isLoadingCollections: isLoading, addCollection, updateCollection, removeCollection, addCountryToCollection, removeCountryFromCollection, refetch: loadCollections, errMessageCollections: errMessage };
 };

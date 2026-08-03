@@ -28,6 +28,8 @@
     width: 80%;
     margin: 0;
     transition: opacity ease-in-out .3s;
+    text-decoration: none;
+    cursor: pointer;
 }
 
 .card__header:hover {
@@ -63,7 +65,13 @@
     font-family: 'Short_Stack';
     font-size: clamp(16px, 1.5vw, 24px);
     width: 90%;
+    max-height: calc(3.5 * 1.5vw);
+    overflow-y: auto;
     text-align: justify;
     margin: 0 auto 40px;
     line-height: clamp(22px, 2.1vw, 30px);
+}
+
+.card__text::-webkit-scrollbar {
+    display: none;
 }

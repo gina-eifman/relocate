@@ -4,8 +4,10 @@ import React from "react";
 import { EMAIL_REGEX } from "../../utils/constants.js";
 import Loader from "../../components/common/Loader/Loader.jsx";
 import { useAuth } from "../../hooks/useAuth.js";
+import ErrorMessage from "../../components/common/ErrorMessage/ErrorMessage.jsx";
 
 function Register({ errMessage, isLoading}) {
+    const formRef = React.useRef(null);
     const [errors, setErrors] = React.useState({});
     const [isValid, setIsValid] = React.useState(false);
     const [formValue, setFormValue] = React.useState({
@@ -16,6 +18,26 @@ function Register({ errMessage, isLoading}) {
     })
     const { handleRegister } = useAuth();
 
+    useEffect(() => {
+        const passwordsMatch = formValue.password === formValue.repeatPassword;
+        setErrors(prev => {
+            const newErrors = { ...prev };
+            if (formValue.password && formValue.repeatPassword) {
+                if (!passwordsMatch) {
+                    newErrors.repeatPassword = "Passwords don't match.";
+                } else {
+                    delete newErrors.repeatPassword;
+                }
+            }
+            return newErrors;
+        });
+
+        if (formRef.current) {
+            const formValid = formRef.current.checkValidity();
+            setIsValid(formValid && passwordsMatch);
+        }
+    }, [formValue.password, formValue.repeatPassword]);
+
     const onSubmit = (formValue) => {
         handleRegister(formValue);
     };
@@ -24,21 +46,21 @@ function Register({ errMessage, isLoading}) {
         const {name, value} = evt.target
         const form = evt.target.closest("form")
         const newFormValue = { ...formValue, [name]: value };
+        setErrors(prev => ({ ...prev, [name]: '' }));
         let error = evt.target.validationMessage;
-
-        setFormValue(newFormValue)
-        if ((name === "password" || name === "repeatPassword") && newFormValue.password !== newFormValue.repeatPassword) {
-            error = "passwords don't match";
-        }
         setErrors(prev => ({ ...prev, [name]: error }));
         const formValid = form.checkValidity();
-        const passwordsMatch = newFormValue.password === newFormValue.repeatPassword;
-        setIsValid(formValid && passwordsMatch);
+        setIsValid(formValid);
     }
     
-    function handleSubmit(evt) {
-        evt.preventDefault();
-        onSubmit(formValue);
+    const handleSubmit = async (evt) => {
+        evt.preventDefault();        
+        setErrors({});
+        try {
+            await onSubmit(formValue);
+        } catch (err) {
+            setErrors({ general: errMessage });
+        }
     }
 
     if (isLoading ) return <Loader />;
@@ -46,7 +68,7 @@ function Register({ errMessage, isLoading}) {
     return(
         <section className={styles.auth}>
             <h1 className={styles.auth__header}>Register</h1>
-            <form className={styles.auth__form}>
+            <form ref={formRef} className={styles.auth__form}>
                 <label className={styles.auth__field}>
                     name
                     <input className={styles.auth__input} onChange={handleChange}
@@ -74,7 +96,7 @@ function Register({ errMessage, isLoading}) {
                 <div className={styles.auth__container}>
                     <button type="submit" className={`${styles.auth__submit} ${isLoading ? styles.auth__submit_loading : ""}`}
                     onClick={handleSubmit} disabled={!isValid}>{isLoading ? "Signing up" : "Sign up"}</button>
-                    <span className={styles.auth__error}>{errMessage}</span> 
+                    <ErrorMessage message={errors.general} />
                 </div>
             </form>
             <p className={styles.auth__text}>Already have an account?

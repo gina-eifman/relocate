@@ -2,42 +2,42 @@ import React from 'react';
 import styles from './SearchBar.module.css';
 import { KEY_WORDS_ERR } from '../../../utils/constants';
 import { useSearchParams } from 'react-router-dom';
+import ErrorMessage from '../ErrorMessage/ErrorMessage';
 
 function SearchBar({onSubmit}) {
     const [searchParams] = useSearchParams();
     const [searchValue, setSearchValue] = React.useState("");
-    const [errMessage, setErrMessage] = React.useState("");
+    const [error, setError] = React.useState("");
     const [isValid, setIsValid] = React.useState(false);
-
+    
     React.useEffect(() => {
-        if (!searchParams.get('category')) {
-            const savedSearch = localStorage.getItem("search");
-            if (savedSearch) {
-                setSearchValue(savedSearch);
-                setIsValid(savedSearch.trim().length > 0);
-        }
-
+        if (searchParams.get('q')) {
+            const savedSearch = searchParams.get('q');
+            setSearchValue(savedSearch);
+            setIsValid(savedSearch.trim().length > 0);
+        } else {
+            setSearchValue('');
         }
     }, []);
 
     function handleChange(e) {
         const newValue = e.target.value;
+        setError('');
         setSearchValue(newValue);
         const valid = newValue.trim().length > 0;
         setIsValid(valid);
-        setErrMessage(valid ? "" : KEY_WORDS_ERR);
+        setError(valid ? "" : KEY_WORDS_ERR);
     }
 
     function handleSubmit(e) {
         e.preventDefault();
         const trimmedValue = searchValue.trim();
         if (trimmedValue === "") {
-            setErrMessage(KEY_WORDS_ERR);
+            setError(KEY_WORDS_ERR);
             return;
         }
-        localStorage.setItem("search", trimmedValue);
         onSubmit(trimmedValue);
-        setErrMessage("");
+        setError("");
     }
 
     return(
@@ -53,7 +53,7 @@ function SearchBar({onSubmit}) {
                 />
                 <button className={styles.searchbar__submit} type="submit" disabled={!isValid}></button>
             </form>
-            <span className={styles.searchbar__error}>{errMessage}</span>
+            <ErrorMessage message={error} />
         </section>
     );
 }

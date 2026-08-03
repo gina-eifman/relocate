@@ -1,6 +1,6 @@
 .profile {
   min-height: 100vh;
-  padding: clamp(60px, 10vw, 120px) 0;
+  padding: clamp(100px, 8vw, 120px) 0 clamp(70px, 9vw, 130px);
   background: url('/images/bg_profile.jpg') center/cover no-repeat fixed;
 }
 
@@ -8,7 +8,7 @@
   font-family: 'Aclonica', sans-serif;
   font-size: clamp(32px, 8vw, 80px);
   text-align: center;
-  margin-bottom: clamp(40px, 8vw, 70px);
+  margin: 0 0 clamp(40px, 8vw, 70px);
   padding: 0 20px;
 }
 

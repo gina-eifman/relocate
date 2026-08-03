@@ -26,5 +26,5 @@ export const useCategories = () => {
     return category ? category.name : categoryId;
   };
 
-  return { categories, isLoading, getCategoryName, refetch: loadCategories };
+  return { categories, isLoadingCategories: isLoading, getCategoryName, refetch: loadCategories };
 };

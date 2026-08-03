@@ -1,17 +1,22 @@
 const rateLimit = require('express-rate-limit');
 const Joi = require('joi');
 
-module.exports.CREATED_STATUS = 201;
-module.exports.INTERNAL_SERVER = 'internal server';
-module.exports.UNAUTHORIZED = 'authorization problem';
-module.exports.NOT_FOUND = 'not found';
-module.exports.BAD_REQUEST = 'bad request';
-module.exports.FORBIDDEN = 'forbidden';
-module.exports.CONFLICT = 'user exists';
-module.exports.REQUIRED = 'required field';
-module.exports.MIN_SYMBOLS = 'minimal length - 2';
-module.exports.MAX_SYMBOLS = 'maximal length - 30';
-module.exports.INCORRECT_EMAIL = 'incorrect email';
+module.exports.REQUIRED = 'Required field.';
+module.exports.MIN_SYMBOLS = 'Minimum length - 2.';
+module.exports.MAX_SYMBOLS = 'Maximum length - 30.';
+module.exports.INCORRECT_EMAIL = 'Incorrect email.';
+module.exports.CONFLICT_ERR = "The user with this email already exists.";
+module.exports.INTERNAL_SERVER_ERR = "Server error. Try again later.";
+module.exports.UNAUTHORIZED_ERR = "You are not authorized. Please log in.";
+module.exports.NOT_FOUND_ERR = 'Not found. Please try again.';
+module.exports.NOT_FOUND_USER_ERR = 'User not found. Please try again.';
+module.exports.NOT_FOUND_COLLECTION_ERR = 'Collection not found. Please try again.';
+module.exports.NOT_FOUND_FAVOURITE_ERR = 'Favourite not found. Please try again.';
+module.exports.BAD_REQUEST_ERR = 'Bad request error. Check the data you sent.';
+module.exports.FORBIDDEN_ERR = 'Access denied. You are not authorized to access this resource.';
+module.exports.MANY_REQUESTS_ERR = 'Too many requests. Please try again later.';
+module.exports.AVATAR_ERR = 'Avatar file is too large. Maximum size is 2 MB.';
+
 module.exports.limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 1000,

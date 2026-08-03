@@ -5,6 +5,7 @@ import { EMAIL_REGEX } from "../../utils/constants.js";
 import { useLocation } from 'react-router-dom';
 import { useAuth } from "../../hooks/useAuth.js";
 import Loader from "../../components/common/Loader/Loader.jsx";
+import ErrorMessage from "../../components/common/ErrorMessage/ErrorMessage.jsx";
 
 function Login({ errMessage, isLoading}) {
     const [errors, setErrors] = React.useState({});
@@ -16,7 +17,7 @@ function Login({ errMessage, isLoading}) {
     const location = useLocation();
     const from = location.state?.from || '/profile';
     const { handleLogin } = useAuth();
-
+    
     const onSubmit = (formValue) => {
         handleLogin(formValue, from);
     };
@@ -24,17 +25,21 @@ function Login({ errMessage, isLoading}) {
     function handleChange(evt) {
         const {name, value} = evt.target;
         const form = evt.target.closest("form");
-        
+        setErrors(prev => ({ ...prev, [name]: '' }));
         setFormValue(prev => ({ ...prev, [name]: value }));
-        setErrors(prev => ({ ...prev, [name]: evt.target.validationMessage }));
-        
+        setErrors(prev => ({ ...prev, [name]: evt.target.validationMessage }));        
         const formValid = form.checkValidity();
         setIsValid(formValid);
     }
     
-    function handleSubmit(evt) {
+    const handleSubmit = async (evt) => {
         evt.preventDefault();
-        onSubmit(formValue);
+        setErrors({});
+        try {
+            await onSubmit(formValue);
+        } catch (err) {
+            setErrors({ general: errMessage });
+        }
     }
 
     if (isLoading ) return <Loader />;
@@ -58,7 +63,7 @@ function Login({ errMessage, isLoading}) {
                 <div className={styles.auth__container}>
                     <button type="submit" className={`${styles.auth__submit} ${isLoading ? styles.auth__submit_loading : ""}`}
                     onClick={handleSubmit} disabled={!isValid || isLoading}>{isLoading ? "Signing in" : "Sign in"}</button>
-                    <span className={styles.auth__error}>{errMessage}</span> 
+                    <ErrorMessage message={errors.general} />
                 </div>
             </form>
             <p className={styles.auth__text}>Don't have an account?

@@ -1,0 +1,7 @@
+.error {
+    font-size: clamp(12px, 1.3vw, 20px);
+    color: #ffc249;
+    margin: 5px 0;
+    font-family: 'Short_Stack';
+    text-align: center;
+}

@@ -1,6 +1,7 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import CollectionPopup from "./../CollectionPopup/CollectionPopup";
 import styles from "./Collections.module.css";
+import { Link } from "react-router-dom";
 
 const Collections = ({
     collections,
@@ -9,11 +10,35 @@ const Collections = ({
     onDeleteCollection,
     onAddCountry,
     onRemoveCountry,
-    countries
+    countries,
+    errMessage
 }) => {
     const [selected, setSelected] = useState(null);
     const [isCreatingNew, setIsCreatingNew] = useState(false);
+    const [errors, setErrors] = useState('');
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(false);
     const scrollRef = useRef(null);
+
+    const checkScroll = () => {
+        if (!scrollRef.current) return;
+        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+        setCanScrollLeft(scrollLeft > 1);
+        setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 1);
+    };
+
+    useEffect(() => {
+        checkScroll();
+        const ref = scrollRef.current;
+        if (ref) {
+            ref.addEventListener('scroll', checkScroll);
+            window.addEventListener('resize', checkScroll);
+            return () => {
+                ref.removeEventListener('scroll', checkScroll);
+                window.removeEventListener('resize', checkScroll);
+            };
+        }
+    }, [collections]);
 
     const scroll = (direction) => {
         if (!scrollRef.current) return;
@@ -33,10 +58,15 @@ const Collections = ({
     };
 
     const handleUpdateCollection = async (collectionId, updates) => {
-        await onUpdateCollection(collectionId, updates);
-        if (selected && selected._id === collectionId) {
-            const updatedCollection = collections.find(c => c._id === collectionId);
-            setSelected(updatedCollection);
+        try {
+            await onUpdateCollection(collectionId, updates);
+            setErrors('');
+            if (selected && selected._id === collectionId) {
+                const updatedCollection = collections.find(c => c._id === collectionId);
+                setSelected(updatedCollection);
+            }
+        } catch (error) {
+            setErrors(errMessage);
         }
     };
 
@@ -45,8 +75,26 @@ const Collections = ({
     };
 
     const handleCreateCollection = async (name, countryIds) => {
-        await onAddCollection(name, countryIds);
-        setIsCreatingNew(false);
+        try {
+            await onAddCollection(name, countryIds);
+            setIsCreatingNew(false);
+            setErrors('');
+        } catch (error) {
+            setErrors(errMessage);
+        }
+    };
+
+    const handleDeleteCollection = async (collectionId) => {
+        try {
+            await onDeleteCollection(collectionId);
+            setErrors({});
+            if (selected && selected._id === collectionId) {
+                setSelected(null);
+            }
+        } catch (err) {
+            console.error('Delete error:', err);
+            setErrors({ general: err.message });
+        }
     };
 
     const handleCloseCreate = () => {
@@ -56,13 +104,27 @@ const Collections = ({
     return (
         <section className={styles.collections}>
             <div className={styles.collections__header}>
-                <button className={styles.collections__arrow} onClick={() => scroll(-1)}>
-                    ←
-                </button>
-                <h2 className={styles.collections__title}>Collections</h2>
-                <button className={styles.collections__arrow} onClick={() => scroll(1)}>
-                    →
-                </button>
+                {collections.length === 0 ? 
+                        <h2 className={styles.collections__title}>Collections</h2> : 
+                    <>
+                        <button 
+                            className={`${styles.collections__arrow} ${!canScrollLeft ? styles.collections__arrow_disabled : ''}`}
+                            onClick={() => scroll(-1)}
+                            disabled={!canScrollLeft}
+                        >
+                            ←
+                        </button>
+                        <h2 className={styles.collections__title}>Collections</h2>
+                        <button 
+                            className={`${styles.collections__arrow} ${!canScrollRight ? styles.collections__arrow_disabled : ''}`}
+                            onClick={() => scroll(1)}
+                            disabled={!canScrollRight}
+                        >
+                            →
+                        </button>
+                    
+                    </>
+                }
             </div>
             <div className={styles.collections__scroll} ref={scrollRef}>
                 {collections.map((col) => (
@@ -80,16 +142,20 @@ const Collections = ({
                                 className={styles.collections__delete}
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    onDeleteCollection(col._id);
+                                    handleDeleteCollection(col._id);
                                 }}
                             />
                             <span className={styles.collections__cardName}>{col.name}</span>
                         </div>
                     </div>
                 ))}
-                <div className={styles.collections__plus} onClick={handleCreateNew}>
-                    +
-                </div>
+                {collections.length === 0 ?
+                    <p className={styles.collections__empty}>
+                        No collections yet. Create your first <Link className={styles.collections__link} onClick={handleCreateNew}>collection</Link>!</p> :
+                    <div className={styles.collections__plus} onClick={handleCreateNew}>
+                        +
+                    </div>
+                }
             </div>
             {selected && (
                 <CollectionPopup

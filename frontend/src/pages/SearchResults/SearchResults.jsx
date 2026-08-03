@@ -7,9 +7,9 @@ import { useFavourites } from '../../hooks/useFavourites';
 import { useCategories } from '../../hooks/useCategories';
 import Loader from '../../components/common/Loader/Loader';
 
-function SearchResults({ countries, isLoading, isLoggedIn }) {
+function SearchResults({ countries, isLoading, isLoggedIn, errMessage }) {
     const { isLiked, toggleFavourite, getFavouriteId } = useFavourites();
-    const { categories, getCategoryName, isLoading: categoriesLoading } = useCategories();
+    const { categories, getCategoryName, isLoadingCategories } = useCategories();
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q');
     const category = searchParams.get('category');
@@ -53,7 +53,7 @@ function SearchResults({ countries, isLoading, isLoggedIn }) {
         displayTitle = `Search results for ${query}`;
     }
 
-    if (isLoading || categoriesLoading) return <Loader />;
+    if (isLoading || isLoadingCategories) return <Loader />;
 
     return (
         <>
@@ -76,6 +76,7 @@ function SearchResults({ countries, isLoading, isLoggedIn }) {
                                 country={country} 
                                 isLiked={isLiked(country.id)} 
                                 onLike={() => toggleFavourite(country.id, getFavouriteId(country.id))}
+                                errMessage={errMessage}
                             />
                         </li>
                     ))}

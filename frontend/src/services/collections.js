@@ -6,6 +6,7 @@ class Collections {
     }
 
     _checkResponseData(res) {
+        if (res.status === 204) return {};
         if (!res.ok) return Promise.reject(`error ${res.status}`);
         return res.json();
     }
@@ -52,9 +53,6 @@ class Collections {
     }
 
     addCountryToCollection(collectionId, countryId, token) {
-        console.log('=== API addCountryToCollection ===');
-        console.log('URL:', `${this._baseUrl}/collections/${collectionId}/countries`);
-        console.log('body:', { countryId });
         return fetch(`${this._baseUrl}/collections/${collectionId}/countries`, {
             method: 'POST',
             headers: {
@@ -66,8 +64,6 @@ class Collections {
     }
 
     removeCountryFromCollection(collectionId, countryId, token) {
-        console.log('=== API removeCountryFromCollection ===');
-        console.log('URL:', `${this._baseUrl}/collections/${collectionId}/countries/${countryId}`);
         return fetch(`${this._baseUrl}/collections/${collectionId}/countries/${countryId}`, {
             method: 'DELETE',
             headers: {

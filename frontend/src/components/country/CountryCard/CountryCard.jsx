@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import styles from './CountryCard.module.css';
+import ErrorMessage from '../../common/ErrorMessage/ErrorMessage';
 
-function CountryCard({isLoggedIn,  country, isLiked, onLike}) {
+function CountryCard({isLoggedIn,  country, isLiked, onLike, errMessage}) {
     return(
         <div className={styles.card}>
             <img src={country.icon} className={styles.card__image} alt='country image' />
@@ -14,6 +15,7 @@ function CountryCard({isLoggedIn,  country, isLiked, onLike}) {
                 )}
             </div>
             <p className={styles.card__text}>{country.shortDescription}</p>
+            <ErrorMessage message={errMessage} />
         </div>
     )
 }

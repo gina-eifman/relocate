@@ -74,7 +74,7 @@ npm run dev
 4. Переменные окружения (бэкенд)
 ```js
 PORT=5000
-MONGO_DB=mongodb://127.0.0.1:27017/relocatedb
+MONGO_URL=mongodb://127.0.0.1:27017/relocatedb
 JWT_SECRET=your-secret-key
 ```
 

@@ -9,7 +9,7 @@ import styles from './Profile.module.css';
 import Loader from '../../components/common/Loader/Loader';
 import { useNavigate } from 'react-router-dom';
 
-const Profile = ({ countries }) => {
+const Profile = ({ countries, errMessagePersonal, errMessageFavourites, errMessageCollections }) => {
   const navigate = useNavigate();
   const {
     user,
@@ -34,13 +34,12 @@ const Profile = ({ countries }) => {
   } = useFavourites();
 
   if (isLoading) return <Loader />;
-  if (!user) navigate('/sign-in');
 
   return (
     <section className={styles.profile}>
       <h1 className={styles.profile__title}>PROFILE</h1>
       <div className={styles.profile__container}>
-        <PersonalInfo user={user} onUpdate={updateUser} isLoading={isLoading} />
+        <PersonalInfo user={user} onUpdate={updateUser} isLoading={isLoading} errMessage={errMessagePersonal} />
         <div className={styles.profile__right}>
           <Favourites
             countries={countries}
@@ -48,6 +47,7 @@ const Profile = ({ countries }) => {
             toggleFavourite={toggleFavourite}
             isLiked={isLiked}
             getFavouriteId={getFavouriteId}
+            errMessage={errMessageFavourites}
           />
           <Collections
             countries={countries}
@@ -57,6 +57,7 @@ const Profile = ({ countries }) => {
             onDeleteCollection={removeCollection}
             onAddCountry={addCountryToCollection}
             onRemoveCountry={removeCountryFromCollection}
+            errMessage={errMessageCollections}
           />
         </div>
       </div>

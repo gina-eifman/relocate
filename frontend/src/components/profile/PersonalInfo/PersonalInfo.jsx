@@ -3,38 +3,57 @@ import styles from './PersonalInfo.module.css';
 import baseAvatar from './../../../images/avatar.png';
 import editIcon from './../../../images/edit.svg';
 import Loader from './../../common/Loader/Loader';
+import ErrorMessage from '../../common/ErrorMessage/ErrorMessage';
+import { AVATAR_ERR, MAX_AVATAR_SIZE } from '../../../utils/constants';
 
-const PersonalInfo = ({ user, onUpdate, isLoading }) => {
+const PersonalInfo = ({ user, onUpdate, isLoading, errMessage }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({ ...user });
   const [oldFormData, setOldFormData] = useState({ ...user });
   const [isSaving, setIsSaving] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [isValid, setIsValid] = useState(false);
   const fileInputRef = useRef(null);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  const handleChange = (evt) => {
+    const { name, value } = evt.target;
+    const form = evt.target.closest("form");
+    setErrors(prev => ({ ...prev, [name]: '' }));
     setFormData(prev => ({ ...prev, [name]: value }));
+    setErrors(prev => ({ ...prev, [name]: evt.target.validationMessage }));        
+    const formValid = form.checkValidity()
+    const avatarValid = !errors.avatar;
+    setIsValid(formValid && avatarValid);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSaving(true);
-    const data = {
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone ? Number(formData.phone) : null,
-      age: formData.age ? Number(formData.age) : null,
-      gender: formData.gender,
-      avatar: formData.avatar || null,
-    };
-    await onUpdate(data);
-    setIsSaving(false);
-    setIsEditing(false);
+const handleSubmit = async (evt) => {
+  evt.preventDefault();
+  setErrors({});
+  setIsSaving(true);
+  const data = {
+    name: formData.name,
+    email: formData.email,
+    phone: formData.phone ? Number(formData.phone) : null,
+    age: formData.age ? Number(formData.age) : null,
+    gender: formData.gender,
+    avatar: formData.avatar || '',
   };
+  try {
+    await onUpdate(data);
+    setIsEditing(false);
+    setErrors({});
+  } catch (err) {
+    console.error('Update error:', err);
+    setErrors(prev => ({ ...prev, general: errMessage }));
+  } finally {
+    setIsSaving(false);
+  }
+};
 
   const handleCancel = () => {
     setFormData({ ...oldFormData });
     setIsEditing(false);
+    setErrors({});
   };
 
   const handleEdit = () => {
@@ -43,13 +62,30 @@ const PersonalInfo = ({ user, onUpdate, isLoading }) => {
     setIsEditing(true);
   };
 
-  const handleAvatarClick = () => {
-    if (isEditing) fileInputRef.current.click();
+  const handleAvatarClick = (evt) => {
+    evt.preventDefault();
+    evt.stopPropagation();
+    if (isEditing && fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
 
-  const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
+  const handleAvatarChange = (evt) => {
+    evt.preventDefault();
+    evt.stopPropagation();
+    const file = evt.target.files[0];
     if (file) {
+      if (file.size > MAX_AVATAR_SIZE) {
+        setErrors(prev => ({
+          ...prev,
+          avatar: AVATAR_ERR
+        }));
+        setIsValid(false);
+        evt.target.value = '';
+        return;
+      }
+      setErrors(prev => ({ ...prev, avatar: '' }));
+      setIsValid(true);
       const reader = new FileReader();
       reader.onloadend = () => {
         setFormData(prev => ({ ...prev, avatar: reader.result }));
@@ -58,20 +94,17 @@ const PersonalInfo = ({ user, onUpdate, isLoading }) => {
     }
   };
 
-  // Определяем URL для отображения аватара:
-  // Если formData.avatar содержит data:image (base64) – используем его
-  // Иначе – стандартная заглушка
-  const avatarUrl = formData.avatar && formData.avatar.startsWith('data:image')
-    ? formData.avatar
-    : baseAvatar;
-
   if (!user || isLoading) return <Loader />;
 
   return (
     <article className={styles.personal}>
       <div className={styles.personal__container}>
         <img
-          src={avatarUrl}
+          src={ 
+            isEditing && formData.avatar
+            ? formData.avatar
+            : (user?.avatar || baseAvatar
+          )}
           alt="avatar"
           className={styles.personal__avatar}
         />
@@ -87,7 +120,9 @@ const PersonalInfo = ({ user, onUpdate, isLoading }) => {
           style={{ display: 'none' }}
           accept="image/*"
           onChange={handleAvatarChange}
+          name="avatar"
         />
+        <ErrorMessage message={errors.avatar} />
       </div>
       <h2 className={styles.personal__heading}>Personal information</h2>
       <form className={styles.personal__form} onSubmit={handleSubmit}>
@@ -107,13 +142,15 @@ const PersonalInfo = ({ user, onUpdate, isLoading }) => {
               disabled={!isEditing || isSaving}
               className={`${styles.personal__input} ${isEditing ? styles.personal__input_editable : ''}`}
             />
+            <ErrorMessage message={errors[field]} />
           </label>
         ))}
         {isEditing ? (
           <div className={styles.personal__actions}>
+            <ErrorMessage message={errors.general} />
             <button
               type="submit"
-              disabled={isSaving}
+              disabled={isSaving || !isValid}
               onClick={handleSubmit}
               className={`${styles.personal__button} ${isSaving ? styles.personal__button_saving : ''}`}
             >

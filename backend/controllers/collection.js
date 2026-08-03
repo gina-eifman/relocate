@@ -2,7 +2,8 @@ const Collection = require('../models/collection');
 const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
 const ForbiddenError = require('../errors/ForbiddenError');
-const { BAD_REQUEST, NOT_FOUND, FORBIDDEN } = require('../utils/constants');
+const { BAD_REQUEST_ERR, NOT_FOUND_COLLECTION_ERR, FORBIDDEN_ERR, MANY_REQUESTS_ERR } = require('../utils/constants');
+const ManyRequestsError = require('../errors/ManyRequestsError');
 
 module.exports.getCollections = (req, res, next) => {
   const owner = req.user._id;
@@ -19,7 +20,9 @@ module.exports.createCollection = (req, res, next) => {
     .then((collection) => res.send(collection))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError(BAD_REQUEST));
+        next(new BadRequestError(BAD_REQUEST_ERR));
+      } else if (err.code === 429) {
+        next(new ManyRequestsError(MANY_REQUESTS_ERR));
       } else {
         next(err);
       }
@@ -34,10 +37,10 @@ module.exports.updateCollection = (req, res, next) => {
   Collection.findById(collectionId)
     .then((collection) => {
       if (!collection) {
-        throw new NotFoundError(NOT_FOUND);
+        next(new NotFoundError(NOT_FOUND_COLLECTION_ERR));
       }
       if (collection.owner.toString() !== userId) {
-        throw new ForbiddenError(FORBIDDEN);
+        next(new ForbiddenError(FORBIDDEN_ERR));
       }
       if (name !== undefined) collection.name = name;
       if (countryIds !== undefined) collection.countryIds = countryIds;
@@ -46,7 +49,9 @@ module.exports.updateCollection = (req, res, next) => {
     .then((updatedCollection) => res.send(updatedCollection))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError(BAD_REQUEST));
+        next(new BadRequestError(BAD_REQUEST_ERR));
+      } else if (err.code === 429) {
+        next(new ManyRequestsError(MANY_REQUESTS_ERR));
       } else {
         next(err);
       }
@@ -60,14 +65,14 @@ module.exports.deleteCollection = (req, res, next) => {
   Collection.findById(collectionId)
     .then((collection) => {
       if (!collection) {
-        throw new NotFoundError(NOT_FOUND);
+        return next(new NotFoundError(NOT_FOUND_COLLECTION_ERR));
       }
       if (collection.owner.toString() !== userId) {
-        throw new ForbiddenError(FORBIDDEN);
+        return next(new ForbiddenError(FORBIDDEN_ERR));
       }
       return Collection.findByIdAndDelete(collectionId);
     })
-    .then(() => res.send({ message: 'Коллекция удалена' }))
+    .then(() => res.status(204).send())
     .catch(next);
 };
 
@@ -78,38 +83,32 @@ module.exports.addCountryToCollection = async (req, res, next) => {
         const userId = req.user._id;
 
         const collection = await Collection.findById(collectionId);
-        if (!collection) throw new NotFoundError(NOT_FOUND);
-        if (collection.owner.toString() !== userId.toString()) throw new ForbiddenError(FORBIDDEN);
-        console.log('Добавляем страну:', countryId, 'в коллекцию:', collectionId);
-        const updated = await Collection.findByIdAndUpdate(
-            collectionId,
-            { $addToSet: { countryIds: countryId } },
-            { returnDocument: 'after', runValidators: true }
-        );
-        console.log('Результат обновления:', updated);
-        res.send(updated);
+        if (!collection) throw new NotFoundError(NOT_FOUND_COLLECTION_ERR);
+        if (collection.owner.toString() !== userId.toString()) throw new ForbiddenError(FORBIDDEN_ERR);
+
+        if (!collection.countryIds.includes(countryId)) {
+            collection.countryIds.push(countryId);
+            await collection.save();
+        }
+        res.send(collection);
     } catch (err) {
         next(err);
     }
 };
 
-module.exports.deleteCountryFromCollection = (req, res, next) => {
-  console.log('=== Бэкенд deleteCountryFromCollection ===');
-  console.log('req.params:', req.params);
-  const { collectionId, countryId } = req.params;
-  const userId = req.user._id;
+module.exports.deleteCountryFromCollection = async (req, res, next) => {
+    try {
+        const { collectionId, countryId } = req.params;
+        const userId = req.user._id;
 
-  Collection.findById(collectionId)
-    .then((collection) => {
-      if (!collection) {
-        throw new NotFoundError(NOT_FOUND);
-      }
-      if (collection.owner.toString() !== userId) {
-        throw new ForbiddenError(FORBIDDEN);
-      }
-      collection.countryIds = collection.countryIds.filter(id => id !== countryId);
-      return collection.save();
-    })
-    .then((updatedCollection) => res.send(updatedCollection))
-    .catch(next);
+        const collection = await Collection.findById(collectionId);
+        if (!collection) throw new NotFoundError(NOT_FOUND_COLLECTION_ERR);
+        if (collection.owner.toString() !== userId.toString()) throw new ForbiddenError(FORBIDDEN_ERR);
+
+        collection.countryIds = collection.countryIds.filter(id => id !== countryId);
+        await collection.save();
+        res.send(collection);
+    } catch (err) {
+        next(err);
+    }
 };

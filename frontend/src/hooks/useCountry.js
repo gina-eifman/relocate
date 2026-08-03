@@ -23,5 +23,5 @@ export const useCountry = (id) => {
         }
     };
     
-    return { countryData, isLoading };
+    return { countryData, isLoadingCountry: isLoading };
 }

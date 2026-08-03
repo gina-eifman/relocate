@@ -4,6 +4,7 @@ import { favouritesAPI } from "../services/favourites";
 export const useFavourites = () => {
     const [liked, setLiked] = React.useState([]);
     const [isLoading, setIsLoading] = React.useState(false);
+    const [errMessage, setErrMessage] = React.useState("");
 
     const getToken = () => localStorage.getItem('jwt');
 
@@ -16,6 +17,7 @@ export const useFavourites = () => {
             setLiked(data);
         } catch (err) {
             console.error(err);
+            setErrMessage(err.message);
         } finally {
             setIsLoading(false);
         }
@@ -41,7 +43,8 @@ export const useFavourites = () => {
                 actualFavouriteId = fav?._id;
             }
             if (!actualFavouriteId) {
-                console.error('Не удалось найти favouriteId для удаления');
+                console.error('Не удалось найти favouriteId для удаления', err);
+                setErrMessage(err.message);
                 return;
             }
             // Оптимистичное обновление
@@ -50,6 +53,7 @@ export const useFavourites = () => {
                 await favouritesAPI.removeFavourite(actualFavouriteId, token);
             } catch (err) {
                 await loadFavourites(); // откат при ошибке
+                setErrMessage(err.message);
             }
         } else {
             // Добавление
@@ -60,6 +64,8 @@ export const useFavourites = () => {
                 setLiked(prev => prev.map(fav => fav.id === 'newLiked' ? newFavourite : fav));
             } catch (err) {
                 await loadFavourites(); // откат при ошибке
+                console.error(err)
+                setErrMessage(err.message);
             }
         }
     };
@@ -69,5 +75,5 @@ export const useFavourites = () => {
         return fav?._id;
     };
 
-    return { liked, isLoading, toggleFavourite, isLiked, getFavouriteId };
+    return { liked, isLoadingFavourites: isLoading, toggleFavourite, isLiked, getFavouriteId, errMessageFavourites: errMessage };
 };
