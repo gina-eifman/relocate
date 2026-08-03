@@ -18,7 +18,7 @@ function Register({ errMessage, isLoading}) {
     })
     const { handleRegister } = useAuth();
 
-    useEffect(() => {
+    React.useEffect(() => {
         const passwordsMatch = formValue.password === formValue.repeatPassword;
         setErrors(prev => {
             const newErrors = { ...prev };
