@@ -26,25 +26,17 @@ function Register({ errMessage, isLoading}) {
         const {name, value} = evt.target
         const form = evt.target.closest("form")
         const newFormValue = { ...formValue, [name]: value };
+        const passwordsMatch = newFormValue.password === newFormValue.repeatPassword;
         setErrors(prev => ({ ...prev, [name]: '' }));
-        
-        const passwordsMatch = formValue.password === formValue.repeatPassword;
-        setErrors(prev => {
-            const newErrors = { ...prev };
-            if (formValue.password && formValue.repeatPassword) {
-                if (!passwordsMatch) {
-                    newErrors.repeatPassword = "Passwords don't match.";
-                } else {
-                    delete newErrors.repeatPassword;
-                }
-            }
-            return newErrors;
-        });
-        
         let error = evt.target.validationMessage;
+
+        setFormValue(newFormValue)
+        if (!passwordsMatch && (name === "password" || name === "repeatPassword")) {
+            setErrors(prev => ({ ...prev, repeatPassword: "Passwords don't match." }));
+        }
         setErrors(prev => ({ ...prev, [name]: error }));
         const formValid = form.checkValidity();
-        setIsValid(formValid);
+        setIsValid(formValid && passwordsMatch);
     }
     
     const handleSubmit = async (evt) => {
