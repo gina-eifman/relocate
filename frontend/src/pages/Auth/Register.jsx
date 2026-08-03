@@ -18,7 +18,16 @@ function Register({ errMessage, isLoading}) {
     })
     const { handleRegister } = useAuth();
 
-    React.useEffect(() => {
+    const onSubmit = (formValue) => {
+        handleRegister(formValue);
+    };
+    
+    function handleChange(evt) {
+        const {name, value} = evt.target
+        const form = evt.target.closest("form")
+        const newFormValue = { ...formValue, [name]: value };
+        setErrors(prev => ({ ...prev, [name]: '' }));
+        
         const passwordsMatch = formValue.password === formValue.repeatPassword;
         setErrors(prev => {
             const newErrors = { ...prev };
@@ -31,22 +40,7 @@ function Register({ errMessage, isLoading}) {
             }
             return newErrors;
         });
-
-        if (formRef.current) {
-            const formValid = formRef.current.checkValidity();
-            setIsValid(formValid && passwordsMatch);
-        }
-    }, [formValue.password, formValue.repeatPassword]);
-
-    const onSubmit = (formValue) => {
-        handleRegister(formValue);
-    };
-    
-    function handleChange(evt) {
-        const {name, value} = evt.target
-        const form = evt.target.closest("form")
-        const newFormValue = { ...formValue, [name]: value };
-        setErrors(prev => ({ ...prev, [name]: '' }));
+        
         let error = evt.target.validationMessage;
         setErrors(prev => ({ ...prev, [name]: error }));
         const formValid = form.checkValidity();
